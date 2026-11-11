@@ -136,4 +136,33 @@ Signed: EMC Admin''');
     expect(message, isNot(contains("you're")));
     expect(message.endsWith('Signed: EMC Admin'), isTrue);
   });
+  group('messageHasBlankStartTime', () {
+    test('true for the generated missing-time message', () {
+      final r = reminder([session(rawStartTime: '')]);
+
+      expect(
+        messageHasBlankStartTime(buildReminderMessage(r, isToday: true)),
+        isTrue,
+      );
+    });
+
+    test('false once the admin types a time', () {
+      final r = reminder([session(rawStartTime: '')]);
+      final edited = buildReminderMessage(
+        r,
+        isToday: true,
+      ).replaceFirst('*Start Time* : ', '*Start Time* : 4:00 PM');
+
+      expect(messageHasBlankStartTime(edited), isFalse);
+    });
+
+    test('checks every class block', () {
+      const message =
+          '*Start Time* : 10:00 AM\n\n*Start Time* :\t\n\nKindly take note.';
+
+      expect(messageHasBlankStartTime(message), isTrue);
+      expect(messageHasBlankStartTime('*Start Time* : 10am'), isFalse);
+      expect(messageHasBlankStartTime('no start time line at all'), isFalse);
+    });
+  });
 }

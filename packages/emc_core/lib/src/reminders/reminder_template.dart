@@ -59,3 +59,13 @@ String buildReminderMessage(TeacherReminder reminder, {required bool isToday}) {
     ReminderTemplate.signature,
   ].join('\n');
 }
+
+/// True when any `*Start Time* :` line in [message] has nothing after the
+/// colon. While true, Send stays disabled (the admin must type the time).
+bool messageHasBlankStartTime(String message) =>
+    _blankStartTimeLine.hasMatch(message);
+
+final _blankStartTimeLine = RegExp(
+  r'^\*Start Time\* *:[ \t]*$',
+  multiLine: true,
+);
