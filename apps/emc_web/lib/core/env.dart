@@ -11,4 +11,9 @@ abstract final class Env {
 
   /// Whether both values were provided at build time.
   static const isConfigured = apiUrl != '' && apiKey != '';
+
+  /// `--dart-define=EMC_DEMO=true`: fake Saturday data and a fixed clock, for
+  /// design checks and screenshots without real teachers' details. Compiled
+  /// out of normal builds.
+  static const demo = bool.fromEnvironment('EMC_DEMO');
 }

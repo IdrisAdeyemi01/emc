@@ -1,25 +1,22 @@
-import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
-import 'package:jaspr_router/jaspr_router.dart';
+import 'package:jaspr_riverpod/jaspr_riverpod.dart';
 
-import '../../../core/router.dart';
-import '../reminders_strings.dart';
+import '../../../shared/toast.dart';
+import '../state/toast_controller.dart';
+import 'reminders_body.dart';
+import 'reminders_header.dart';
 
-/// Teacher Reminders (`/reminders`). M1 placeholder; the approved
-/// "Card stack" design is built in M4.
+/// Teacher Reminders (`/reminders`), approved "Card stack" layout.
 class RemindersPage extends StatelessComponent {
   const RemindersPage({super.key});
 
   @override
   Component build(BuildContext context) {
-    return main_(classes: 'container stack', [
-      Link(
-        to: AppPaths.home,
-        classes: 'text-link',
-        child: Component.text(RemindersStrings.backToHome),
-      ),
-      h1([Component.text(RemindersStrings.heading)]),
-      p(classes: 'muted', [Component.text(RemindersStrings.placeholder)]),
+    final toast = context.watch(toastProvider);
+    return Component.fragment([
+      const RemindersHeader(),
+      const RemindersBody(),
+      ToastRegion(message: toast?.text, success: toast?.success ?? true),
     ]);
   }
 }

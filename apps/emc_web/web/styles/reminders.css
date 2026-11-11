@@ -1,0 +1,312 @@
+/*
+ * Teacher Reminders (/reminders) and Home (/) layouts. Approved designs:
+ * Layout 1 "Card stack" and Home (docs/design/README.md).
+ */
+
+/* ---------- Reminders list ---------- */
+
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--gutter) var(--space-8);
+}
+
+.reminders-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.header-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.updated-wide {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .reminders-list {
+    padding: var(--space-6) var(--gutter-wide) var(--space-8);
+  }
+
+  .reminders-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .header-controls {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .header-controls .chips {
+    margin: 0;
+    padding: 2px;
+  }
+
+  .header-controls .progress {
+    width: 280px;
+    flex: none;
+  }
+
+  .updated-wide {
+    display: inline;
+  }
+
+  .updated-narrow {
+    display: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-controls .progress {
+    width: 320px;
+  }
+}
+
+/* ---------- Teacher card parts ---------- */
+
+.classes {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1) 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.classes li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.classes li:last-child {
+  border-bottom: 0;
+}
+
+.class-line {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.time {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-time);
+  white-space: nowrap;
+}
+
+.time-missing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: var(--weight-semibold);
+  color: var(--color-warning-text);
+  white-space: nowrap;
+}
+
+.preview summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tap-min);
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  list-style: none;
+  cursor: pointer;
+}
+
+.preview summary::-webkit-details-marker {
+  display: none;
+}
+
+.preview .summary-hide {
+  display: none;
+}
+
+.preview[open] .summary-show {
+  display: none;
+}
+
+.preview[open] .summary-hide {
+  display: inline;
+}
+
+.preview[open] summary .icon {
+  transform: rotate(180deg);
+}
+
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.btn-reason {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (min-width: 1024px) {
+  .card-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .card-actions .btn-secondary {
+    height: var(--control-height-lg);
+  }
+
+  .card-actions .btn-reason {
+    grid-column: 1 / -1;
+    order: 3;
+  }
+}
+
+/* ---------- Skeleton card shapes ---------- */
+
+.skel-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.skel-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ---------- Home ---------- */
+
+.home-header {
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+}
+
+.home-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 28px var(--gutter) var(--space-4);
+}
+
+.home-title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.home-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-6) var(--gutter) var(--space-8);
+}
+
+.home-date {
+  font-size: var(--text-sm);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-1);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.tile:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.tile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  color: var(--color-link);
+}
+
+.tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  color: var(--color-brand);
+}
+
+.tile-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.tile-text {
+  font-size: var(--text-sm);
+}
+
+.tile-cta {
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+@media (min-width: 768px) {
+  .home-header-inner {
+    padding: 20px var(--gutter-wide);
+  }
+
+  .home-main {
+    padding: var(--space-8) var(--gutter-wide);
+  }
+
+  .home-date {
+    font-size: var(--text-md);
+  }
+
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.tile-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
