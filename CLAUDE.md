@@ -245,7 +245,7 @@ emc/
 ### 4.1 Workflow (mandatory for UI work)
 UI is designed **before** it is built. For any new screen or significant UI change:
 
-1. **Design system first (once).** Before the first screen, create the EMC design system: color, type, spacing, radius, shadow and motion tokens + core components (section 4.4). Record the tokens as CSS custom properties in `docs/design/tokens.css` during M0 (no app exists yet); M1 moves that file to `apps/emc_web/web/styles/tokens.css`, which is its permanent home. Once tokens and shared components exist in code (end of M4), run `/design-sync` so later designs inherit them.
+1. **Design system first (once).** Before the first screen, create the EMC design system: color, type, spacing, radius, shadow and motion tokens + core components (section 4.4). Record the tokens as CSS custom properties in `docs/design/tokens.css` during M0 (no app exists yet); M1 moves that file to `apps/emc_web/web/styles/tokens.css`, which is its permanent home. Once tokens and shared components exist in code (end of M4), publish them so later designs inherit them: this is the **EMC Mint Paper** Design System artifact (https://claude.ai/artifact/8G4Ynxe1Nx9dzvMzCndRc7). Start new `/design` canvases from it, and update it whenever `tokens.css` or the shared component CSS changes.
 2. **Explore with `/design`.** Use `/design` with the brief in 4.2/4.3 to generate **2 to 3 directions** as artboards for the screen, covering the states listed for it. Note the trade-offs between directions.
 3. **Owner picks.** Stop and wait for Idris to choose a direction and leave comments. Refine until approved. Don't implement an unapproved design.
 4. **Record it.** Add the approved design link + key decisions to `docs/design/README.md`.
@@ -356,7 +356,7 @@ cd backend/apps_script && clasp push && clasp deploy
 - **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`. **Done 2026-11-11.**
 - **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests. **Done 2026-11-11.**
 - **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests. **Done 2026-11-11** (live check passed; the browser fetch is first exercised in M4).
-- **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`. **Done 2026-11-11**, except `/design-sync`, which the owner runs.
+- **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`. **Done 2026-11-11.** `/design-sync` replaced by the EMC Mint Paper Design System artifact (see decisions).
 - **M5** GitHub Pages deploy via Actions (`emc.github.io`), SPA 404 fallback, short admin how-to in `docs/`.
 - **Later** Flutter `emc_mobile` app on `emc_core`; more features (timetable view, teacher directory, attendance, admin auth).
 
@@ -414,4 +414,5 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: A failed refresh keeps the last loaded timetable on screen and shows a toast; only the first load shows the full error panel.
 - 2026-11-11: Demo mode (`EMC_DEMO=true`) uses an in-memory store seeded with 3 sent marks and a clock fixed at Saturday 14 Nov 2026, 8:15 AM Lagos.
 - 2026-11-11: Packages added to `emc_web`: `jaspr_riverpod` (state, named in 3.3), `universal_web` (browser APIs that still compile on the VM for tests), `jaspr_test` (dev, component tests).
-- 2026-11-11: M4 complete (owner still to run `/design-sync`). Verified in demo mode at 375/768/1280 against the artboards, and with the live backend in the browser (counts only, no screenshots of real data).
+- 2026-11-11: M4 complete. Verified in demo mode at 375/768/1280 against the artboards, and with the live backend in the browser (counts only, no screenshots of real data).
+- 2026-11-11: `/design-sync` doesn't fit this repo (it uploads a compiled React library; our components are Jaspr/Dart) and standalone Claude Design closes by 14 Dec 2026. Instead, the **EMC Mint Paper** Design System artifact (https://claude.ai/artifact/8G4Ynxe1Nx9dzvMzCndRc7) holds `tokens.json` (converted exactly from `tokens.css`), `components/bundle.css` (base + components + reminders CSS), the logo, a conventions README with the class vocabulary, and static previews of 12 components using the real classes. No JS bundle.

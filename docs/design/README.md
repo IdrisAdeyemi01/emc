@@ -7,6 +7,7 @@ Design record for the EMC Portal (see `CLAUDE.md` section 4). Nothing is impleme
   - Page *Teacher Reminders*: `/reminders` Layout 1 (approved) and Layout 2 (not chosen), all states, 360 / 768 / 1280
   - Page *Home*: `/` at 360 and 1280
 - **Tokens:** [`apps/emc_web/web/styles/tokens.css`](../../apps/emc_web/web/styles/tokens.css) (moved from `docs/design/` in M1; the only tokens file)
+- **Design System artifact:** https://claude.ai/artifact/8G4Ynxe1Nx9dzvMzCndRc7 (private; start new `/design` canvases from it)
 - **Brand assets:** [`apps/emc_web/web/assets/brand/`](../../apps/emc_web/web/assets/brand/) (`emc-logo.svg` is the one to use)
 
 ## Status
@@ -17,7 +18,7 @@ Design record for the EMC Portal (see `CLAUDE.md` section 4). Nothing is impleme
 | Teacher Reminders `/reminders` | **Approved: Layout 1 "Card stack"** (2026-11-11) |
 | Home `/` | **Approved** (2026-11-11) |
 | Implementation | **Built in M4** (`apps/emc_web`): matches the artboards at 375 / 768 / 1280 in demo mode |
-| `/design-sync` | To run (owner): tokens and shared components now exist in code |
+| Design System artifact | **Published:** [EMC Mint Paper](https://claude.ai/artifact/8G4Ynxe1Nx9dzvMzCndRc7) (tokens, shipped CSS, logo, class vocabulary, 12 static component previews). Replaces `/design-sync`. |
 
 ## Design system: C "Mint Paper"
 
