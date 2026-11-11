@@ -223,6 +223,7 @@ emc/
   - Browser APIs (localStorage, clipboard) live behind interfaces in `core/browser/` and use `package:universal_web`, never `package:web`, so component tests run on the VM.
   - Jaspr's `onClick` calls `preventDefault()` on `<a>` elements. For links that must still open (the `wa.me` Send link), attach a raw `events: {'click': ...}` listener instead (see `AppButton`).
   - Only one `jaspr serve` can run per package directory (shared build daemon).
+  - Every routed page's `build` returns **one root element** (`div(classes: 'page', ...)`), never `Component.fragment`: the browser renderer can't detach a top-level fragment when the router swaps pages, so the URL changes but the old page stays. `test/core/router_test.dart` guards this.
 - Jaspr's API has changed between versions. **Before writing components, check the installed `jaspr` version's docs/changelog** (e.g. the `build` method signature and styling APIs) instead of assuming from memory.
 - Installed versions (M1): `jaspr` 0.23.5, `jaspr_router` 0.9.0, `jaspr_cli` 0.23.5. Components are `Component build(BuildContext context)`; HTML helpers (`div`, `main_`, `img`, ...) come from `package:jaspr/dom.dart`; text is `Component.text(...)`; route titles come from `Route(title: ...)`.
 - Styling: components use CSS classes and `var(--token)` values from `web/styles/tokens.css`. No hardcoded colors, sizes or spacing in components. See section 4.

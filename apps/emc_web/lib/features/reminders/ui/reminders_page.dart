@@ -1,3 +1,4 @@
+import 'package:jaspr/dom.dart';
 import 'package:jaspr/jaspr.dart';
 import 'package:jaspr_riverpod/jaspr_riverpod.dart';
 
@@ -13,7 +14,9 @@ class RemindersPage extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final toast = context.watch(toastProvider);
-    return Component.fragment([
+    // One root element per page: Jaspr can't detach a top-level fragment when
+    // the router swaps pages ("Cannot remove fragment from a different parent").
+    return div(classes: 'page', [
       const RemindersHeader(),
       const RemindersBody(),
       ToastRegion(message: toast?.text, success: toast?.success ?? true),

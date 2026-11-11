@@ -20,7 +20,9 @@ class HomePage extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final today = context.watch(todayDateProvider);
-    return Component.fragment([
+    // One root element per page: Jaspr can't detach a top-level fragment when
+    // the router swaps pages ("Cannot remove fragment from a different parent").
+    return div(classes: 'page', [
       header(classes: 'home-header', [
         div(classes: 'home-header-inner', [
           const BrandLogo(),
