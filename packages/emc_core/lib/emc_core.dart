@@ -3,11 +3,13 @@
 ///
 /// This package must never import Jaspr, Flutter, `dart:html`/`dart:js_interop`
 /// or `package:web`.
-///
-/// Layout (filled in from M2):
-/// - `src/common/`     Clock, Result, failures, Weekday, time parsing, logger
-/// - `src/timetable/`  ClassSession, sheet row parser, TimetableRepository
-/// - `src/reminders/`  TeacherReminder, grouping, PhoneNumber, ReminderTemplate
 library;
 
+// common: time, days, results, logging
+export 'src/common/calendar_date.dart';
+export 'src/common/class_time.dart';
+export 'src/common/clock.dart';
+export 'src/common/failure.dart';
 export 'src/common/logger.dart';
+export 'src/common/result.dart';
+export 'src/common/weekday.dart';
