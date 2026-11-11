@@ -1,0 +1,173 @@
+/*
+ * EMC design tokens — Direction C "Mint Paper" (approved 2026-11-11).
+ *
+ * Single source of truth for every color, size and timing in the UI.
+ * M0 home: docs/design/tokens.css. In M1 this file is moved with
+ * `git mv` to apps/emc_web/web/styles/tokens.css (its permanent home).
+ *
+ * Structure:
+ *   1. Primitives  (raw scales: never referenced directly by components)
+ *   2. Semantic    (what components use; a future dark theme only
+ *                   overrides this layer)
+ *   3. Type, space, radius, shadow, motion, layout
+ *
+ * Contrast rules (WCAG 2.1 AA):
+ *   - --green-500 (brand #27A844) is 3.1:1 on white. Logo, icons, progress
+ *     fills, decorative fills and headings >= 24px (or >= 19px bold) ONLY.
+ *     Never body text, never behind normal-size white text.
+ *   - Buttons, links and green text use --green-700 #1E7F34
+ *     (5.07:1 with white, 4.67:1 on the mint page --green-50).
+ *   - Status is never color alone: always icon + text.
+ */
+
+:root {
+  /* ---------- 1. Primitives ---------- */
+
+  /* Green, derived from brand #27A844 */
+  --green-50: #eef8f0;
+  --green-100: #d4efda;
+  --green-200: #a9dfb5;
+  --green-300: #74cb88;
+  --green-400: #46b862;
+  --green-500: #27a844; /* brand */
+  --green-600: #208f3a;
+  --green-700: #1e7f34; /* action */
+  --green-800: #17692b;
+  --green-900: #0f4a1e; /* focus ring */
+
+  /* Neutrals, built around charcoal #2F2F2F */
+  --neutral-0: #ffffff;
+  --neutral-50: #f6f6f5;
+  --neutral-100: #ededec;
+  --neutral-200: #dededc;
+  --neutral-300: #c4c4c2;
+  --neutral-400: #9a9a98;
+  --neutral-500: #6b6b69; /* muted text: 5.3:1 white, 4.9:1 mint */
+  --neutral-600: #555553;
+  --neutral-700: #3f3f3e;
+  --neutral-800: #2f2f2f; /* charcoal: body text */
+  --neutral-900: #1a1a1a;
+
+  /* Status (foreground on its own tint; all >= 5.7:1) */
+  --success-700: #0f5132;
+  --success-50: #ddf1e4;
+  --warning-700: #8a5300;
+  --warning-50: #fff4db;
+  --danger-700: #b42318;
+  --danger-50: #fdedeb;
+  --info-700: #1f5fa8;
+  --info-50: #eaf2fc;
+
+  /* ---------- 2. Semantic ---------- */
+
+  --color-bg-page: var(--green-50);
+  --color-bg-surface: var(--neutral-0);
+  --color-bg-subtle: var(--green-50); /* insets inside cards */
+  --color-bg-disabled: var(--neutral-100);
+
+  --color-text: var(--neutral-800);
+  --color-text-muted: var(--neutral-500);
+  --color-text-disabled: var(--neutral-500);
+  --color-text-time: var(--green-800); /* class start times */
+
+  --color-border: var(--green-100); /* dividers */
+  --color-border-input: var(--green-200); /* inputs, chips */
+  --color-border-strong: var(--green-700); /* secondary button */
+  --color-border-neutral: var(--neutral-300); /* "Not sent" badge */
+
+  --color-brand: var(--green-500);
+  --color-action: var(--green-700);
+  --color-action-hover: var(--green-800);
+  --color-on-action: var(--neutral-0);
+  --color-link: var(--green-700);
+  --color-focus: var(--green-900);
+
+  --color-chip-bg: var(--neutral-0);
+  --color-chip-selected-bg: var(--green-700);
+  --color-chip-selected-text: var(--neutral-0);
+
+  --color-progress-track: var(--green-100);
+  --color-progress-fill: var(--green-500);
+
+  --color-skeleton: var(--green-100);
+  --color-skeleton-soft: var(--green-50);
+
+  --color-success-text: var(--success-700);
+  --color-success-bg: var(--success-50);
+  --color-warning-text: var(--warning-700);
+  --color-warning-bg: var(--warning-50);
+  --color-danger-text: var(--danger-700);
+  --color-danger-bg: var(--danger-50);
+  --color-info-text: var(--info-700);
+  --color-info-bg: var(--info-50);
+
+  /* ---------- 3. Type ---------- */
+
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Noto Sans", sans-serif;
+
+  /* ratio ~1.25 */
+  --text-xs: 13px;
+  --text-sm: 15px;
+  --text-md: 16px; /* body; never smaller on inputs (prevents zoom) */
+  --text-lg: 20px;
+  --text-xl: 25px;
+  --text-2xl: 31px;
+  --text-chip-sub: 11px; /* "Today" line inside a day chip */
+
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-body: 1.55;
+  --leading-message: 1.45; /* message preview textarea */
+
+  /* ---------- Space (4px base) ---------- */
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+
+  /* ---------- Radius (0–6px, square character of the mark) ---------- */
+
+  --radius-none: 0;
+  --radius-sm: 4px; /* badges, progress bar, skeleton bars */
+  --radius-md: 6px; /* cards, buttons, chips, inputs */
+
+  /* ---------- Shadow (green-tinted, soft) ---------- */
+
+  --shadow-1: 0 1px 2px rgba(15, 74, 30, 0.08), 0 2px 8px rgba(15, 74, 30, 0.06);
+  --shadow-2: 0 4px 8px rgba(15, 74, 30, 0.1), 0 12px 24px rgba(15, 74, 30, 0.1);
+
+  /* ---------- Motion ---------- */
+
+  --motion-fast: 150ms;
+  --motion-base: 240ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ---------- Layout ---------- */
+
+  --tap-min: 44px; /* minimum touch target */
+  --control-height: 48px; /* buttons */
+  --control-height-lg: 52px; /* primary send button, day chips */
+  --gutter: 16px; /* page side padding at all widths < 768 */
+  --gutter-wide: 32px; /* >= 768px */
+  --content-max: 1100px;
+  --focus-ring: 3px solid var(--color-focus);
+  --focus-offset: 2px;
+  /* Breakpoints (media queries can't read custom properties):
+     base 360px · 2 columns from 768px · content max-width 1100px at 1280px */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+  }
+}
