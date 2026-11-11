@@ -15,6 +15,7 @@ export 'src/common/result.dart';
 export 'src/common/weekday.dart';
 // timetable: the Teachers' Contacts tab
 export 'src/timetable/class_session.dart';
+export 'src/timetable/contacts_response.dart';
 export 'src/timetable/sheet_parser.dart';
 export 'src/timetable/sheet_table.dart';
 export 'src/timetable/timetable.dart';
