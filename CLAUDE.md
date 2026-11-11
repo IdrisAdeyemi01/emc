@@ -68,6 +68,10 @@ Other tabs (`School Period`, `Teachers List & Subject`, `Holiday Coaching`) are 
    - `234XXXXXXXXXX` (13 digits) → keep
    - anything else → **invalid**. Show the card with a warning and disable its send button. Never guess.
 8. If no rows match the selected day, show an empty state ("No classes scheduled for Friday"), not an error.
+9. **Unusable rows:** fully blank rows are dropped silently. A row with a blank or unrecognizable Day, or a Day but no Class/Subject/Teacher/Phone, is skipped and counted (`Timetable.skipped`, row number + reason only) so the UI can say "1 row couldn't be read".
+10. **Blank phone:** the row still becomes a card with an invalid-phone warning ("No phone number in the sheet"). Blank-phone rows are grouped by teacher name; other invalid phones by their raw text.
+11. **Unreadable times** sort after readable ones, in sheet order (within a card); teachers with no readable time go last (on the page).
+12. Day chips = days with classes, plus today even if it has none.
 
 ### 2.5 Message template
 
@@ -115,6 +119,8 @@ Field values (`Class`, `Subject`, `Start Time`) are inserted **exactly as writte
 If the selected day isn't today, replace "today" in "your class at EMC today" with the weekday, e.g. "at EMC on Saturday". "Hope you’re doing great today." stays unchanged.
 
 If a row's Start Time cell is blank, the card shows a "Start time missing" warning and the admin must type it into the editable preview before sending.
+
+Cells are trimmed (stray whitespace), so a value never carries a trailing space: the admin's sample `*Subject* : Mathematics ` comes out as `*Subject* : Mathematics`. The template's own trailing space after "today." / "on Saturday." stays, and so does the one in a blank `*Start Time* : ` line.
 
 The template string lives in one place (`emc_core`, `ReminderTemplate`). Build it with a pure function `String buildReminderMessage(TeacherReminder r, {required bool isToday})`. Golden-string tests cover the single-class, multi-class, not-today and missing-time variants.
 
@@ -298,6 +304,7 @@ dart format .
 
 # core
 cd packages/emc_core && dart test             # unit tests
+cd packages/emc_core && dart run coverage:test_with_coverage   # writes coverage/lcov.info (git-ignored)
 
 # web (from apps/emc_web)
 jaspr serve --dart-define-from-file=../../.env.local   # dev server, http://localhost:8080 (use --port to change)
@@ -333,7 +340,7 @@ cd backend/apps_script && clasp push && clasp deploy
 ## 9. Roadmap
 - **M0** Design first (section 4), before any code exists: design system + tokens (saved to `docs/design/tokens.css`), then Home and Teacher Reminders screens with all states, via `/design`. Owner approval required. Output: `docs/design/README.md` with approved links and decisions. **Done 2026-11-11.**
 - **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`. **Done 2026-11-11.**
-- **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests.
+- **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests. **Done 2026-11-11.**
 - **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests.
 - **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`.
 - **M5** GitHub Pages deploy via Actions (`emc.github.io`), SPA 404 fallback, short admin how-to in `docs/`.
@@ -371,3 +378,9 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: `emc_core` test dependency pinned to `^1.26.0` (resolves to a version compatible with `jaspr_builder`'s analyzer 12).
 - 2026-11-11: `index.html` has no static `<title>`; each route's `title` sets it (a static one would win over the router's).
 - 2026-11-11: M1 complete.
+- 2026-11-11: Unusable rows, blank phones, unreadable-time ordering and template trimming follow 2.4 rules 9-12 and the note in 2.5 (approved by Idris).
+- 2026-11-11: `TimetableRepository.loadTimetable()` returns a parsed `Timetable`; implementations call `parseContactsSheet` on the raw `SheetTable`.
+- 2026-11-11: `sentStorageKey(date, reminder)` takes the date as a parameter. Whether it's the send date or the class date (so reminders sent Friday night for Saturday still show "Sent" on Saturday) is decided in M4.
+- 2026-11-11: Golden test strings write trailing spaces as `\u0020`, because editors strip real trailing spaces.
+- 2026-11-11: `coverage` dev dependency added to measure the ~100% business-rule target (100% of `emc_core` lines at M2).
+- 2026-11-11: M2 complete.
