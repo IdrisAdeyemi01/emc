@@ -16,7 +16,8 @@ Design record for the EMC Portal (see `CLAUDE.md` section 4). Nothing is impleme
 | Design system | **Approved: Direction C "Mint Paper"** (2026-11-11) |
 | Teacher Reminders `/reminders` | **Approved: Layout 1 "Card stack"** (2026-11-11) |
 | Home `/` | **Approved** (2026-11-11) |
-| `/design-sync` | After M4, once tokens and shared components exist in code |
+| Implementation | **Built in M4** (`apps/emc_web`): matches the artboards at 375 / 768 / 1280 in demo mode |
+| `/design-sync` | To run (owner): tokens and shared components now exist in code |
 
 ## Design system: C "Mint Paper"
 
@@ -64,6 +65,13 @@ Chosen over Layout 2 "Next up" (focused next teacher + grouped rows): the order 
 - **Error:** "Couldn’t load the timetable" + Try again; day chips and progress hidden.
 - **Loading:** skeleton chips, progress and three skeleton cards (shimmer off under reduced motion).
 - **768px:** two columns of cards, buttons stacked. **1280px:** content max-width 1100px, two columns, Send and Copy side by side, Refresh as a labelled button.
+
+## Changes from the artboards (approved in the M4 plan or noted there)
+
+- **Skipped-rows notice:** an info notice above the list when the sheet has rows that couldn't be read. Only shown when it happens.
+- **"Mark as sent" on invalid-phone cards:** a ghost button under Copy, so the admin can record a reminder sent another way and still reach "All sent".
+- **Copy failure toast:** "Couldn't copy. Open the message, then press and hold to copy it."
+- **Setup state:** "This site isn't set up yet" when a build has no API URL or key.
 
 ## Screen inventory
 

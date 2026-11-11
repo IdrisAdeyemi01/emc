@@ -219,10 +219,14 @@ emc/
 - Mode: **client** (SPA compiled to static files). Data is fetched in the browser on each load, which meets the "refresh shows latest data" requirement.
 - Routing with `jaspr_router`. Initial routes: `/` (home with feature tiles), `/reminders`. Leave room for future routes.
 - State: `jaspr_riverpod`. One provider for the fetched sheet data (refreshable), derived providers for the selected day and grouped reminders, and a notifier for "sent" state.
+  - As built (M4): `core/providers.dart` (clock, repository, storage, clipboard: override these in tests), `features/reminders/state/` (`timetableProvider` with Loading / NotConfigured / Loaded(refreshing) / Failed(retrying) states, selected day, reminders, sent marks, message drafts, toast). Components read providers with `context.watch` / `context.read`.
+  - Browser APIs (localStorage, clipboard) live behind interfaces in `core/browser/` and use `package:universal_web`, never `package:web`, so component tests run on the VM.
+  - Jaspr's `onClick` calls `preventDefault()` on `<a>` elements. For links that must still open (the `wa.me` Send link), attach a raw `events: {'click': ...}` listener instead (see `AppButton`).
+  - Only one `jaspr serve` can run per package directory (shared build daemon).
 - Jaspr's API has changed between versions. **Before writing components, check the installed `jaspr` version's docs/changelog** (e.g. the `build` method signature and styling APIs) instead of assuming from memory.
 - Installed versions (M1): `jaspr` 0.23.5, `jaspr_router` 0.9.0, `jaspr_cli` 0.23.5. Components are `Component build(BuildContext context)`; HTML helpers (`div`, `main_`, `img`, ...) come from `package:jaspr/dom.dart`; text is `Component.text(...)`; route titles come from `Route(title: ...)`.
 - Styling: components use CSS classes and `var(--token)` values from `web/styles/tokens.css`. No hardcoded colors, sizes or spacing in components. See section 4.
-  - Styles are **plain CSS files** in `web/styles/` linked from `index.html` (tokens.css, base.css, then per-component stylesheets). Don't use Jaspr's `@css`/`Styles` API. `pubspec.yaml` sets `jaspr: styles: standalone` only because client mode requires it.
+  - Styles are **plain CSS files** in `web/styles/` linked from `index.html`: `tokens.css`, `base.css`, `components.css` (all of `lib/shared/`), then one file per feature (`reminders.css`, which also holds Home). Few files keep requests low on mobile data. Don't use Jaspr's `@css`/`Styles` API. `pubspec.yaml` sets `jaspr: styles: standalone` only because client mode requires it.
 
 ### 3.4 Hosting: GitHub Pages
 - Target URL: `https://emc.github.io`. This is a GitHub **user/organization site**, so it needs a GitHub account or organization named `emc` with a repo named `emc.github.io` (served at the root path `/`). If the site ends up as a project site instead (`https://<owner>.github.io/<repo>/`), set the base path accordingly in `index.html` (`<base href>`) and the router, and update this section.
@@ -313,6 +317,10 @@ jaspr build --dart-define-from-file=../../.env.local   # output: apps/emc_web/bu
 # web tests (from apps/emc_web; VM tests, no browser needed)
 dart test
 
+# demo mode (from apps/emc_web): fake Saturday data + fixed clock, for design checks
+# and screenshots without real teachers' details
+jaspr serve --port 8092 --dart-define=EMC_DEMO=true
+
 # live backend check (from apps/emc_web; reads ../../.env.local, prints counts only)
 dart run tool/check_backend.dart
 
@@ -348,7 +356,7 @@ cd backend/apps_script && clasp push && clasp deploy
 - **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`. **Done 2026-11-11.**
 - **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests. **Done 2026-11-11.**
 - **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests. **Done 2026-11-11** (live check passed; the browser fetch is first exercised in M4).
-- **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`.
+- **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`. **Done 2026-11-11**, except `/design-sync`, which the owner runs.
 - **M5** GitHub Pages deploy via Actions (`emc.github.io`), SPA 404 fallback, short admin how-to in `docs/`.
 - **Later** Flutter `emc_mobile` app on `emc_core`; more features (timetable view, teacher directory, attendance, admin auth).
 
@@ -397,3 +405,13 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: `tool/check_backend.dart` verifies the live backend through the real repository and prints counts only. First run: 51 rows, 0 skipped, Saturday up to 3 classes per teacher.
 - 2026-11-11: `http` (backend calls, named in 3.2) and `test` (web repository tests) added to `emc_web`.
 - 2026-11-11: M3 complete. Pending owner step: set the spreadsheet's General access to Restricted.
+- 2026-11-11: "Sent" marks are keyed by the **class date** (today, or the next occurrence of the selected weekday), so reminders sent the night before still show "Sent" on the day. Marks older than 14 days are deleted on load.
+- 2026-11-11: Tapping Send on WhatsApp marks the card sent (CLAUDE.md 2.6); "Mark as not sent" undoes it. No Undo button on toasts.
+- 2026-11-11: Rows the parser skipped show one info notice above the list ("1 row in the sheet couldn't be read"). Not in the approved artboards; approved by Idris in the M4 plan.
+- 2026-11-11: Invalid-phone cards get a ghost "Mark as sent" button (the admin copies the message and sends it another way). Without it, "all sent" could never be reached while any phone is invalid. Not in the approved artboards.
+- 2026-11-11: Send stays disabled while any `*Start Time* :` line in the (edited) message is blank (`messageHasBlankStartTime` in `emc_core`).
+- 2026-11-11: Copy uses the Clipboard API, falling back to select + `execCommand('copy')`; if both fail, a toast says to press and hold the message instead.
+- 2026-11-11: A failed refresh keeps the last loaded timetable on screen and shows a toast; only the first load shows the full error panel.
+- 2026-11-11: Demo mode (`EMC_DEMO=true`) uses an in-memory store seeded with 3 sent marks and a clock fixed at Saturday 14 Nov 2026, 8:15 AM Lagos.
+- 2026-11-11: Packages added to `emc_web`: `jaspr_riverpod` (state, named in 3.3), `universal_web` (browser APIs that still compile on the VM for tests), `jaspr_test` (dev, component tests).
+- 2026-11-11: M4 complete (owner still to run `/design-sync`). Verified in demo mode at 375/768/1280 against the artboards, and with the live backend in the browser (counts only, no screenshots of real data).
