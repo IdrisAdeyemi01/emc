@@ -19,3 +19,10 @@ export 'src/timetable/sheet_parser.dart';
 export 'src/timetable/sheet_table.dart';
 export 'src/timetable/timetable.dart';
 export 'src/timetable/timetable_repository.dart';
+// reminders: grouping, phones, the message
+export 'src/reminders/build_reminders.dart';
+export 'src/reminders/phone_number.dart';
+export 'src/reminders/reminder_day.dart';
+export 'src/reminders/reminder_template.dart';
+export 'src/reminders/teacher_reminder.dart';
+export 'src/reminders/whatsapp_link.dart';
