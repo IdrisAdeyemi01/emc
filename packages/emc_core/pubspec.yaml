@@ -1,0 +1,13 @@
+name: emc_core
+description: Pure-Dart models and business rules shared by the EMC web and mobile apps.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+resolution: workspace
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.26.0
