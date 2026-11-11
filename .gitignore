@@ -10,3 +10,4 @@ build/
 *.log
 .claude/launch.json
 coverage/
+.clasp.json
