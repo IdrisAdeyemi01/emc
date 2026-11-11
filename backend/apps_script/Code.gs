@@ -5,7 +5,8 @@
  *   GET <web app URL>?action=contacts&key=<EMC_API_KEY>
  *   200 -> { ok: true, fetchedAt, sheet, headers: [...], rows: [[...], ...] }
  *   200 -> { ok: false, error: "unauthorized" | "sheet_not_found"
- *                             | "unknown_action" | "not_configured" | "internal" }
+ *                             | "unknown_action" | "not_configured" | "not_bound"
+ *                             | "internal" }
  *
  * Apps Script web apps can't set HTTP status codes, so errors are in the body.
  * Values come from getDisplayValues(), exactly as shown in the sheet ("4:00 PM").
@@ -39,7 +40,13 @@ function doGet(e) {
 
 /** Reads the whole tab as displayed text: header row + data rows. */
 function readContacts_() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  if (!spreadsheet) {
+    // Only bound scripts (Extensions -> Apps Script from the sheet) have one.
+    console.error('Not bound to a spreadsheet. Create the script from the sheet.');
+    return { ok: false, error: 'not_bound' };
+  }
+  var sheet = spreadsheet.getSheetByName(SHEET_NAME);
   if (!sheet) {
     return { ok: false, error: 'sheet_not_found' };
   }

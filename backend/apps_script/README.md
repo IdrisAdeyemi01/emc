@@ -44,6 +44,7 @@ Files:
    EMC_API_KEY set: yes
    ```
    If you see `Problem: sheet_not_found`, the tab isn't named exactly `Teachers' Contacts` (straight apostrophe).
+   If you see `Problem: not_bound` (or "Cannot read properties of null (reading 'getSheetByName')"), the script wasn't created from the sheet. Create it again from the sheet's **Extensions → Apps Script** menu (step 1); a project made at script.google.com isn't attached to any spreadsheet.
 
 ### 6. Deploy as a web app
 1. **Deploy → New deployment.**
