@@ -6,8 +6,8 @@ Design record for the EMC Portal (see `CLAUDE.md` section 4). Nothing is impleme
   - Page *Design system*: the three explored directions (A Ledger, B Charcoal Block, C Mint Paper)
   - Page *Teacher Reminders*: `/reminders` Layout 1 (approved) and Layout 2 (not chosen), all states, 360 / 768 / 1280
   - Page *Home*: `/` at 360 and 1280
-- **Tokens:** [`tokens.css`](tokens.css) (moves to `apps/emc_web/web/styles/tokens.css` in M1)
-- **Brand assets:** [`brand/`](brand/) (`emc-logo.svg` is the one to use)
+- **Tokens:** [`apps/emc_web/web/styles/tokens.css`](../../apps/emc_web/web/styles/tokens.css) (moved from `docs/design/` in M1; the only tokens file)
+- **Brand assets:** [`apps/emc_web/web/assets/brand/`](../../apps/emc_web/web/assets/brand/) (`emc-logo.svg` is the one to use)
 
 ## Status
 
@@ -74,6 +74,6 @@ Chosen over Layout 2 "Next up" (focused next teacher + grouped rows): the order 
 
 ## Decisions log
 
-- 2026-11-11: Three design-system directions explored; **C "Mint Paper"** approved by Idris. Tokens saved to `tokens.css`.
+- 2026-11-11: Three design-system directions explored; **C "Mint Paper"** approved by Idris. Tokens saved to `tokens.css` (now `apps/emc_web/web/styles/tokens.css`).
 - 2026-11-11: Two `/reminders` layouts explored; **Layout 1 "Card stack"** chosen by Idris over Layout 2 "Next up".
 - 2026-11-11: Home and `/reminders` Layout 1 approved by Idris. **M0 complete.**

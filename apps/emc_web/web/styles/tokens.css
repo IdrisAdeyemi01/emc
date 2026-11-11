@@ -2,8 +2,8 @@
  * EMC design tokens — Direction C "Mint Paper" (approved 2026-11-11).
  *
  * Single source of truth for every color, size and timing in the UI.
- * M0 home: docs/design/tokens.css. In M1 this file is moved with
- * `git mv` to apps/emc_web/web/styles/tokens.css (its permanent home).
+ * Permanent home: apps/emc_web/web/styles/tokens.css (moved here from
+ * docs/design/ in M1). There is only ever one tokens file.
  *
  * Structure:
  *   1. Primitives  (raw scales: never referenced directly by components)
