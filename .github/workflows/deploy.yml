@@ -1,0 +1,84 @@
+# Builds the Jaspr site and publishes it to GitHub Pages on every push to main.
+# Setup (once): Settings → Pages → Source = "GitHub Actions", and add the
+# repository secrets EMC_API_URL and EMC_API_KEY (see docs/deploy.md).
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      # Project site: https://<owner>.github.io/<repo>/ → "/<repo>/".
+      # For a user/organization site (<owner>.github.io repo) this becomes "/".
+      BASE_PATH: /${{ github.event.repository.name }}/
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.13.7
+
+      - name: Install dependencies
+        run: dart pub get
+
+      - name: Analyze
+        run: dart analyze
+
+      - name: Test core
+        working-directory: packages/emc_core
+        run: dart test
+
+      - name: Test web
+        working-directory: apps/emc_web
+        run: dart test
+
+      - name: Build site
+        working-directory: apps/emc_web
+        env:
+          EMC_API_URL: ${{ secrets.EMC_API_URL }}
+          EMC_API_KEY: ${{ secrets.EMC_API_KEY }}
+        run: |
+          dart pub global activate jaspr_cli 0.23.5
+          jaspr build \
+            --dart-define=EMC_API_URL="$EMC_API_URL" \
+            --dart-define=EMC_API_KEY="$EMC_API_KEY"
+
+      - name: Prepare Pages output
+        working-directory: apps/emc_web/build/jaspr
+        run: |
+          # Build-only leftovers; the compiled JS doesn't load them.
+          rm -rf packages .dart_tool .build.manifest
+          # Serve under the repo path (local `jaspr serve` keeps "/").
+          sed -i "s|<base href=\"/\">|<base href=\"$BASE_PATH\">|" index.html
+          grep -q "<base href=\"$BASE_PATH\">" index.html
+          # Pages has no SPA rewrites: unknown paths (e.g. a refresh on
+          # /reminders) get 404.html, which boots the same app.
+          cp index.html 404.html
+          touch .nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/emc_web/build/jaspr
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
