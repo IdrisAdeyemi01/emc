@@ -162,7 +162,7 @@ The Dart side talks to the backend only through a `TimetableRepository` interfac
 
 ## 3. Architecture
 
-### 3.1 Repository layout (Dart pub workspace, Dart ≥ 3.6)
+### 3.1 Repository layout (Dart pub workspace, Dart ≥ 3.10)
 
 ```
 emc/
@@ -172,8 +172,7 @@ emc/
 ├── .github/workflows/deploy.yml # build Jaspr site + deploy to GitHub Pages
 ├── docs/
 │   └── design/
-│       ├── README.md            # approved design links, decisions, screen inventory (section 4)
-│       └── brand/               # emc-logo.svg + original logo files (moved to web/assets/brand in M1)
+│       └── README.md            # approved design links, decisions, screen inventory (section 4)
 ├── packages/
 │   └── emc_core/                # PURE DART. No Jaspr, no Flutter, no dart:html/web.
 │       ├── lib/
@@ -186,16 +185,18 @@ emc/
 ├── apps/
 │   ├── emc_web/                 # Jaspr app (client mode, static hosting)
 │   │   ├── lib/
-│   │   │   ├── main.dart / app.dart
-│   │   │   ├── core/            # router, theme (Dart side of tokens), env config, http data source impl
+│   │   │   ├── main.client.dart # browser entrypoint (compiled to main.client.dart.js)
+│   │   │   ├── app.dart         # root component: Router
+│   │   │   ├── core/            # router.dart (routes + AppPaths), env.dart, later data/ (http data source impl)
 │   │   │   ├── shared/          # reusable components (buttons, cards, chips, empty/error/loading states, layout shell)
 │   │   │   └── features/
-│   │   │       └── reminders/   # pages + components + state for this feature
+│   │   │       ├── home/        # <feature>_strings.dart + ui/
+│   │   │       └── reminders/   # <feature>_strings.dart + state/ + ui/
 │   │   └── web/
-│   │       ├── index.html
+│   │       ├── index.html          # <base href="/">; no <title> (routes set it)
 │   │       ├── styles/tokens.css   # DESIGN TOKENS: single source of truth (CSS custom properties)
 │   │       ├── styles/base.css     # reset, typography, layout primitives
-│   │       └── assets/             # logo, icons (SVG)
+│   │       └── assets/brand/       # emc-logo.svg (use this) + owner's original JPGs
 │   └── emc_mobile/              # Flutter app: NOT created yet. Will depend on emc_core.
 └── backend/
     └── apps_script/             # Code.gs, appsscript.json, README.md (deploy steps)
@@ -213,7 +214,9 @@ emc/
 - Routing with `jaspr_router`. Initial routes: `/` (home with feature tiles), `/reminders`. Leave room for future routes.
 - State: `jaspr_riverpod`. One provider for the fetched sheet data (refreshable), derived providers for the selected day and grouped reminders, and a notifier for "sent" state.
 - Jaspr's API has changed between versions. **Before writing components, check the installed `jaspr` version's docs/changelog** (e.g. the `build` method signature and styling APIs) instead of assuming from memory.
+- Installed versions (M1): `jaspr` 0.23.5, `jaspr_router` 0.9.0, `jaspr_cli` 0.23.5. Components are `Component build(BuildContext context)`; HTML helpers (`div`, `main_`, `img`, ...) come from `package:jaspr/dom.dart`; text is `Component.text(...)`; route titles come from `Route(title: ...)`.
 - Styling: components use CSS classes and `var(--token)` values from `web/styles/tokens.css`. No hardcoded colors, sizes or spacing in components. See section 4.
+  - Styles are **plain CSS files** in `web/styles/` linked from `index.html` (tokens.css, base.css, then per-component stylesheets). Don't use Jaspr's `@css`/`Styles` API. `pubspec.yaml` sets `jaspr: styles: standalone` only because client mode requires it.
 
 ### 3.4 Hosting: GitHub Pages
 - Target URL: `https://emc.github.io`. This is a GitHub **user/organization site**, so it needs a GitHub account or organization named `emc` with a repo named `emc.github.io` (served at the root path `/`). If the site ends up as a project site instead (`https://<owner>.github.io/<repo>/`), set the base path accordingly in `index.html` (`<base href>`) and the router, and update this section.
@@ -221,8 +224,8 @@ emc/
 - GitHub Pages has no SPA rewrites: a refresh on `/reminders` would 404. Copy the built `index.html` to `404.html` in the workflow (or use hash-based routing if that proves unreliable). Add an empty `.nojekyll`.
 
 ### 3.5 Config & secrets
-- `EMC_API_URL` and `EMC_API_KEY` are passed at build time with `--dart-define` (read via `const String.fromEnvironment`). Verify the exact flag supported by the installed `jaspr_cli` (`jaspr serve` / `jaspr build`).
-- Locally: a git-ignored `.env.local` (document the variables in `.env.example`). In CI: GitHub Actions secrets.
+- `EMC_API_URL` and `EMC_API_KEY` are passed at build time with `--dart-define` (read via `const String.fromEnvironment` in `apps/emc_web/lib/core/env.dart`). Both `jaspr serve` and `jaspr build` accept `--dart-define=KEY=VALUE` and `--dart-define-from-file=<.env or .json>` (verified with jaspr_cli 0.23.5).
+- Locally: a git-ignored `.env.local` at the repo root, passed with `--dart-define-from-file` (variables documented in `.env.example`). In CI: GitHub Actions secrets.
 - **Never commit real keys, tokens or real phone numbers.**
 
 ---
@@ -246,7 +249,7 @@ UI is designed **before** it is built. For any new screen or significant UI chan
 - **Primary user:** the EMC admin, on an **Android phone**, often on mobile data. Secondary: other EMC coordinators on laptops.
 - **Job to be done:** in under two minutes, see today's teachers and send every reminder, knowing for sure who's been reminded.
 - **Context and tone:** an Islamic community tutoring program. Calm, clean, respectful and trustworthy. Not playful, not corporate. No photos of people.
-- **Brand assets:** in `docs/design/brand/` (moved to `apps/emc_web/web/assets/brand/` in M1).
+- **Brand assets:** in `apps/emc_web/web/assets/brand/` (moved from `docs/design/brand/` in M1).
   - `emc-logo.svg`: the EMC mark, a green square with a stepped "E" cut out. The cut-out is transparent, so it works on any background. Use this for the app; the PNG/JPEG files are the owner's originals for reference.
   - Official backgrounds the logo appears on: white `#FFFFFF`, charcoal `#2F2F2F`, black `#000000`.
   - Don't redraw, recolor, rotate, add effects to or crop the logo. Give it clear space of at least 25% of its width.
@@ -280,21 +283,25 @@ UI is designed **before** it is built. For any new screen or significant UI chan
 
 ## 5. Commands
 
-> Fill in exact commands once scaffolding is done, and keep this section accurate.
+> Keep this section accurate. Verified at M1 (Dart 3.13.7, jaspr_cli 0.23.5).
 
 ```bash
+# one-time setup
+dart pub global activate jaspr_cli            # if `jaspr` isn't installed
+export PATH="$PATH:$HOME/.pub-cache/bin"      # add to your shell profile; `jaspr` lives here
+cp .env.example .env.local                    # then fill in EMC_API_URL / EMC_API_KEY (git-ignored)
+
 # from repo root
-dart pub get                                  # resolves the whole workspace
+dart pub get                                  # resolves the whole workspace (one pubspec.lock)
+dart analyze                                  # must be clean (0 issues)
+dart format .
 
 # core
 cd packages/emc_core && dart test             # unit tests
-dart analyze                                  # from root: must be clean (0 issues)
-dart format .                                 # from root
 
-# web
-cd apps/emc_web
-jaspr serve --dart-define=EMC_API_URL=... --dart-define=EMC_API_KEY=...
-jaspr build --dart-define=EMC_API_URL=... --dart-define=EMC_API_KEY=...   # output: build/jaspr
+# web (from apps/emc_web)
+jaspr serve --dart-define-from-file=../../.env.local   # dev server, http://localhost:8080 (use --port to change)
+jaspr build --dart-define-from-file=../../.env.local   # output: apps/emc_web/build/jaspr
 
 # backend (if using clasp)
 cd backend/apps_script && clasp push && clasp deploy
@@ -325,7 +332,7 @@ cd backend/apps_script && clasp push && clasp deploy
 
 ## 9. Roadmap
 - **M0** Design first (section 4), before any code exists: design system + tokens (saved to `docs/design/tokens.css`), then Home and Teacher Reminders screens with all states, via `/design`. Owner approval required. Output: `docs/design/README.md` with approved links and decisions. **Done 2026-11-11.**
-- **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`.
+- **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`. **Done 2026-11-11.**
 - **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests.
 - **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests.
 - **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`.
@@ -358,3 +365,9 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: `/reminders` layout = "Card stack": cards in time order, sent cards shrink to compact in place, message hidden until opened (open by default when the start time is missing). Two columns from 768px.
 - 2026-11-11: Home = logo, date (Lagos time) and one Teacher Reminders tile with today's count and progress; no placeholder tiles.
 - 2026-11-11: M0 complete; approved designs and decisions recorded in `docs/design/README.md`.
+- 2026-11-11: Dart SDK floor raised to 3.10 (required by Jaspr 0.23). Workspace uses `resolution: workspace` with one root `pubspec.lock`.
+- 2026-11-11: Styles are plain CSS files in `web/styles/`, not Jaspr's `@css` API, so the approved designs' CSS ports directly.
+- 2026-11-11: `jaspr_riverpod` and `http` are added when first used (M3/M4), not in M1.
+- 2026-11-11: `emc_core` test dependency pinned to `^1.26.0` (resolves to a version compatible with `jaspr_builder`'s analyzer 12).
+- 2026-11-11: `index.html` has no static `<title>`; each route's `title` sets it (a static one would win over the router's).
+- 2026-11-11: M1 complete.
