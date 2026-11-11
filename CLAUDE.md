@@ -9,7 +9,7 @@ If something here conflicts with a request, ask before deviating. When a decisio
 
 **EMC Portal** is the web app (and later mobile app) for our **Extra Mural Class (EMC)**, an after-school tutoring program for JSS 1 to SSS 3 students.
 
-- **Phase now:** Website only, built with **Jaspr** (Dart web framework), hosted on **GitHub Pages** at `https://emc.github.io`.
+- **Phase now:** Website only, built with **Jaspr** (Dart web framework), hosted on **GitHub Pages** at `https://idrisadeyemi01.github.io/emc/` (repo `IdrisAdeyemi01/emc`).
 - **Later:** An Android APK built with **Flutter**, reusing the same Dart business logic.
 - **Backend / source of truth:** A **Google Sheet** that admins edit directly. The app never owns data that lives in the sheet. Every page load or refresh must show the sheet's current data.
 - **First feature:** Teacher Daily Reminders (section 2). More features will follow (timetable view, teacher directory, attendance, etc.), so build everything as one feature inside a multi-feature app, not as a one-off page.
@@ -177,6 +177,8 @@ emc/
 ├── analysis_options.yaml        # shared lints (package:lints/recommended + strict-casts/inference/raw-types)
 ├── .github/workflows/deploy.yml # build Jaspr site + deploy to GitHub Pages
 ├── docs/
+│   ├── deploy.md                # Pages setup, secrets, key rotation
+│   ├── admin-guide.md           # short how-to for the EMC admin
 │   └── design/
 │       └── README.md            # approved design links, decisions, screen inventory (section 4)
 ├── packages/
@@ -230,9 +232,9 @@ emc/
   - Styles are **plain CSS files** in `web/styles/` linked from `index.html`: `tokens.css`, `base.css`, `components.css` (all of `lib/shared/`), then one file per feature (`reminders.css`, which also holds Home). Few files keep requests low on mobile data. Don't use Jaspr's `@css`/`Styles` API. `pubspec.yaml` sets `jaspr: styles: standalone` only because client mode requires it.
 
 ### 3.4 Hosting: GitHub Pages
-- Target URL: `https://emc.github.io`. This is a GitHub **user/organization site**, so it needs a GitHub account or organization named `emc` with a repo named `emc.github.io` (served at the root path `/`). If the site ends up as a project site instead (`https://<owner>.github.io/<repo>/`), set the base path accordingly in `index.html` (`<base href>`) and the router, and update this section.
-- Deploy with GitHub Actions (`.github/workflows/deploy.yml`): set up Dart, `dart pub get`, `jaspr build` with the defines from repo **Actions secrets**, then `actions/upload-pages-artifact` + `actions/deploy-pages`. Pages source = "GitHub Actions".
-- GitHub Pages has no SPA rewrites: a refresh on `/reminders` would 404. Copy the built `index.html` to `404.html` in the workflow (or use hash-based routing if that proves unreliable). Add an empty `.nojekyll`.
+- URL: `https://idrisadeyemi01.github.io/emc/`, a **project site** from the public repo `IdrisAdeyemi01/emc` (`emc.github.io` wasn't available). Source `index.html` keeps `<base href="/">` for local dev; the workflow rewrites it to `/<repo>/` (`BASE_PATH`), and Jaspr's router and the relative asset URLs follow `<base href>`. For a user/org site set `BASE_PATH: /`.
+- Deploy with GitHub Actions (`.github/workflows/deploy.yml`): set up Dart, `dart pub get`, `dart analyze` + tests, `jaspr build` with the defines from repo **Actions secrets**, then `actions/upload-pages-artifact` + `actions/deploy-pages`. Pages source = "GitHub Actions".
+- GitHub Pages has no SPA rewrites: a refresh on `/reminders` would 404. The workflow copies the built `index.html` to `404.html`, adds an empty `.nojekyll` and drops build leftovers (`packages/`, `.dart_tool/`, `.build.manifest`). Setup steps and key rotation: `docs/deploy.md`; admin how-to: `docs/admin-guide.md`.
 
 ### 3.5 Config & secrets
 - `EMC_API_URL` and `EMC_API_KEY` are passed at build time with `--dart-define` (read via `const String.fromEnvironment` in `apps/emc_web/lib/core/env.dart`). Both `jaspr serve` and `jaspr build` accept `--dart-define=KEY=VALUE` and `--dart-define-from-file=<.env or .json>` (verified with jaspr_cli 0.23.5).
@@ -328,7 +330,8 @@ dart run tool/check_backend.dart
 # backend: deploy steps in backend/apps_script/README.md (paste into the bound script, or clasp)
 cd backend/apps_script && clasp push && clasp deploy
 
-# deploy: push to main → GitHub Actions builds and publishes to GitHub Pages
+# deploy: push to main → GitHub Actions analyzes, tests, builds and publishes to
+# https://idrisadeyemi01.github.io/emc/ (one-time setup in docs/deploy.md)
 ```
 
 ## 6. Coding conventions
@@ -358,7 +361,7 @@ cd backend/apps_script && clasp push && clasp deploy
 - **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests. **Done 2026-11-11.**
 - **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests. **Done 2026-11-11** (live check passed; the browser fetch is first exercised in M4).
 - **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`. **Done 2026-11-11.** `/design-sync` replaced by the EMC Mint Paper Design System artifact (see decisions).
-- **M5** GitHub Pages deploy via Actions (`emc.github.io`), SPA 404 fallback, short admin how-to in `docs/`.
+- **M5** GitHub Pages deploy via Actions (`idrisadeyemi01.github.io/emc`), SPA 404 fallback, short admin how-to in `docs/`. **Done 2026-11-11** (workflow + docs; site goes live once the repo secrets and Pages source are set).
 - **Later** Flutter `emc_mobile` app on `emc_core`; more features (timetable view, teacher directory, attendance, admin auth).
 
 ## 10. Rules for Claude
@@ -417,3 +420,8 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: Packages added to `emc_web`: `jaspr_riverpod` (state, named in 3.3), `universal_web` (browser APIs that still compile on the VM for tests), `jaspr_test` (dev, component tests).
 - 2026-11-11: M4 complete. Verified in demo mode at 375/768/1280 against the artboards, and with the live backend in the browser (counts only, no screenshots of real data).
 - 2026-11-11: `/design-sync` doesn't fit this repo (it uploads a compiled React library; our components are Jaspr/Dart) and standalone Claude Design closes by 14 Dec 2026. Instead, the **EMC Mint Paper** Design System artifact (https://claude.ai/artifact/8G4Ynxe1Nx9dzvMzCndRc7) holds `tokens.json` (converted exactly from `tokens.css`), `components/bundle.css` (base + components + reminders CSS), the logo, a conventions README with the class vocabulary, and static previews of 12 components using the real classes. No JS bundle.
+- 2026-11-11: `emc.github.io` wasn't available. Hosting is a project site at `https://idrisadeyemi01.github.io/emc/` from the public repo `IdrisAdeyemi01/emc` (public because free Pages needs it). The default branch is `main`.
+- 2026-11-11: Before the first push, git history was rewritten to replace a real phone number, real teacher names and the spreadsheet ID in CLAUDE.md with fake values. The spreadsheet ID isn't stored in the repo; the Apps Script is bound to the sheet.
+- 2026-11-11: Base path is set at deploy time (the workflow rewrites `<base href>`), so `jaspr serve` keeps working at `/`. Verified with a local Pages-like server: cold deep link to `/emc/reminders` via `404.html`, navigation in both directions, and assets.
+- 2026-11-11: The deploy workflow runs `dart analyze` and both test suites before building, so a red build never publishes.
+- 2026-11-11: M5 complete.
