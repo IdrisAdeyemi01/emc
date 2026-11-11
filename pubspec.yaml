@@ -1,0 +1,13 @@
+name: emc_workspace
+description: EMC Portal Dart workspace (shared core + apps).
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+workspace:
+  - packages/emc_core
+  - apps/emc_web
+
+dev_dependencies:
+  lints: ^6.1.0

@@ -1,2 +1,11 @@
+# OS
 .DS_Store
+
+# Local secrets (see .env.example)
 .env.local
+
+# Dart / Jaspr
+.dart_tool/
+build/
+*.log
+.claude/launch.json
