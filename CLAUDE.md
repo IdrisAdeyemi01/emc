@@ -156,7 +156,7 @@ GET {EMC_API_URL}?action=contacts&key={EMC_API_KEY}
   "headers": ["Day","Class","Subject","Teacher","Phone numbers","Start Time"],
   "rows": [ ["Monday","JSS 1","Mathematics","Bro Yusuf Adebayo","08000000001","4:00 PM"], ... ]
 }
-error → { "ok": false, "error": "unauthorized" | "sheet_not_found" | "..." }
+error → { "ok": false, "error": "unauthorized" | "sheet_not_found" | "unknown_action" | "not_configured" | "not_bound" | "internal" }
 ```
 - Return **raw headers + raw rows** using `getDisplayValues()`, so times arrive exactly as shown in the sheet (`4:00 PM`), not as date serials. All parsing and rules stay in Dart (`emc_core`), so they're testable and shared with the future Flutter app.
 - **No caching** (no `CacheService`). Freshness beats speed here.
@@ -211,7 +211,7 @@ emc/
 ### 3.2 Layering rules
 - **Feature-first** folders inside each app; inside a feature: `data/` (if feature-specific), `state/`, `ui/` (pages + components).
 - Dependency direction: `ui → state → emc_core`. UI never parses sheet data, builds phone numbers or composes messages; it calls `emc_core`.
-- `emc_core` exposes the `TimetableRepository` **interface** and models. The HTTP implementation (`AppsScriptTimetableRepository`) lives in `apps/emc_web/lib/core/data/` (move to a small `emc_data` package when the Flutter app needs it). Use `package:http` so it works on web and mobile.
+- `emc_core` exposes the `TimetableRepository` **interface** and models. The HTTP implementation (`AppsScriptTimetableRepository`) lives in `apps/emc_web/lib/core/data/` (move to a small `emc_data` package when the Flutter app needs it). Use `package:http` so it works on web and mobile. JSON decoding of the response (`decodeContactsResponse` / `timetableFromResponse`) lives in `emc_core`, so the repository is only HTTP + failure mapping and the Flutter app can reuse the decoding.
 - Errors: return a sealed `Result<T>` / failure types from the repository (network error, unauthorized, sheet missing, malformed headers). UI maps each to a human message + Retry button. No uncaught exceptions reaching the UI.
 - Immutable models (`final` fields, `const` constructors, `==`/`hashCode`). Use Dart 3 records/sealed classes/pattern matching. Only add `freezed`/`json_serializable` if models grow enough to justify codegen.
 
@@ -310,7 +310,13 @@ cd packages/emc_core && dart run coverage:test_with_coverage   # writes coverage
 jaspr serve --dart-define-from-file=../../.env.local   # dev server, http://localhost:8080 (use --port to change)
 jaspr build --dart-define-from-file=../../.env.local   # output: apps/emc_web/build/jaspr
 
-# backend (if using clasp)
+# web tests (from apps/emc_web; VM tests, no browser needed)
+dart test
+
+# live backend check (from apps/emc_web; reads ../../.env.local, prints counts only)
+dart run tool/check_backend.dart
+
+# backend: deploy steps in backend/apps_script/README.md (paste into the bound script, or clasp)
 cd backend/apps_script && clasp push && clasp deploy
 
 # deploy: push to main → GitHub Actions builds and publishes to GitHub Pages
@@ -341,7 +347,7 @@ cd backend/apps_script && clasp push && clasp deploy
 - **M0** Design first (section 4), before any code exists: design system + tokens (saved to `docs/design/tokens.css`), then Home and Teacher Reminders screens with all states, via `/design`. Owner approval required. Output: `docs/design/README.md` with approved links and decisions. **Done 2026-11-11.**
 - **M1** Workspace scaffold: root workspace, `emc_core`, `emc_web` (Jaspr client mode), lints, router with placeholder pages. `git mv docs/design/tokens.css apps/emc_web/web/styles/tokens.css` so there is only ever one tokens file; update the pointer in `docs/design/README.md`. **Done 2026-11-11.**
 - **M2** `emc_core`: models, parser, time parsing, phone, grouping, template, Clock + full tests. **Done 2026-11-11.**
-- **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests.
+- **M3** Apps Script backend v1 (`contacts` action) + README deploy steps; `AppsScriptTimetableRepository` + tests. **Done 2026-11-11** (live check passed; the browser fetch is first exercised in M4).
 - **M4** Build the approved UI in Jaspr: shared components, Reminders page wired to real data, sent tracking, all states. Then `/design-sync`.
 - **M5** GitHub Pages deploy via Actions (`emc.github.io`), SPA 404 fallback, short admin how-to in `docs/`.
 - **Later** Flutter `emc_mobile` app on `emc_core`; more features (timetable view, teacher directory, attendance, admin auth).
@@ -384,3 +390,10 @@ cd backend/apps_script && clasp push && clasp deploy
 - 2026-11-11: Golden test strings write trailing spaces as `\u0020`, because editors strip real trailing spaces.
 - 2026-11-11: `coverage` dev dependency added to measure the ~100% business-rule target (100% of `emc_core` lines at M2).
 - 2026-11-11: M2 complete.
+- 2026-11-11: Backend deployed by the sheet owner as a script bound to the spreadsheet (`spreadsheets.currentonly` scope), web app "Execute as: Me", "Anyone". A standalone script can't read the sheet and now returns `not_bound`.
+- 2026-11-11: Backend errors added beyond v1's examples: `unknown_action`, `not_configured` (no key in Script Properties), `not_bound`. The app maps them to `UnexpectedResponseFailure`.
+- 2026-11-11: The repository sends no custom headers (no CORS preflight), times out after 20 s (Apps Script cold starts), decodes UTF-8 itself, and never logs the URL (it carries the key) or the body (it holds phones).
+- 2026-11-11: `createTimetableRepository()` returns null when `EMC_API_URL`/`EMC_API_KEY` are missing or the URL isn't https; M4 shows a setup error for that.
+- 2026-11-11: `tool/check_backend.dart` verifies the live backend through the real repository and prints counts only. First run: 51 rows, 0 skipped, Saturday up to 3 classes per teacher.
+- 2026-11-11: `http` (backend calls, named in 3.2) and `test` (web repository tests) added to `emc_web`.
+- 2026-11-11: M3 complete. Pending owner step: set the spreadsheet's General access to Restricted.
