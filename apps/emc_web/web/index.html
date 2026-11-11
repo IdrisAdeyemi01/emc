@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Site is served at the root of https://emc.github.io. For a project
-         site (https://<owner>.github.io/<repo>/) change this to "/<repo>/". -->
+    <!-- "/" for local `jaspr serve`. The deploy workflow rewrites it to the
+         Pages path ("/<repo>/"); the router and relative asset URLs follow it.
+         Keep this exact line: the workflow matches it. -->
+
     <base href="/">
 
     <!-- No <title> here: each route sets it (jaspr_router appends its own
